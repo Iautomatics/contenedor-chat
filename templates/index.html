@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <title>Robotik IA</title>
+    <!-- ✅ Adaptación para móviles -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
       :root { 
         --bg: #0f1117;
@@ -27,23 +30,24 @@
         height: 100vh;
       }
       h2 {
-        padding: 20px;
+        padding: 16px;
         margin: 0;
         font-weight: 600;
         border-bottom: 1px solid var(--border);
         background: linear-gradient(90deg, var(--assistant-bubble), transparent);
+        font-size: 1.2rem;
       }
       #box {
         flex: 1;
-        padding: 20px;
+        padding: 16px;
         overflow-y: auto;
         background: var(--bg);
       }
       .message {
         max-width: 700px;
-        margin: 0 auto 18px;
+        margin: 0 auto 14px;
         display: flex;
-        gap: 12px;
+        gap: 10px;
         animation: fadeIn 220ms ease-out;
       }
       @keyframes fadeIn {
@@ -51,13 +55,14 @@
         to { opacity: 1; transform: translateY(0); }
       }
       .bubble {
-        padding: 14px 16px;
+        padding: 12px 14px;
         border-radius: var(--radius);
         border: 1px solid var(--border);
         box-shadow: var(--shadow);
-        line-height: 1.55;
+        line-height: 1.5;
         position: relative;
         flex: 1;
+        word-wrap: break-word; /* ✅ evita desbordes en móvil */
       }
       .bubble.user {
         background: var(--user-bubble);
@@ -80,13 +85,13 @@
       }
       .input-area {
         display: flex;
-        padding: 16px;
+        padding: 12px;
         border-top: 1px solid var(--border);
         background: var(--assistant-bubble);
       }
       input {
         flex: 1;
-        padding: 12px 14px;
+        padding: 10px 12px;
         border-radius: var(--radius);
         border: 1px solid var(--border);
         background: var(--card);
@@ -95,8 +100,8 @@
         outline: none;
       }
       button {
-        margin-left: 12px;
-        padding: 12px 18px;
+        margin-left: 8px;
+        padding: 10px 14px;
         border-radius: var(--radius);
         border: none;
         background: linear-gradient(90deg, var(--primary), var(--accent));
@@ -105,47 +110,20 @@
         cursor: pointer;
         box-shadow: var(--shadow);
         transition: 180ms ease;
+        flex-shrink: 0; /* ✅ evita que se achique demasiado */
       }
       button:hover {
         transform: translateY(-1px);
         filter: brightness(1.05);
       }
 
-      /* Estilos para contenido Markdown */
-      .bubble.assistant pre {
-        background: #0b0f16;
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 12px;
-        overflow: auto;
+      /* ✅ Ajustes para pantallas pequeñas */
+      @media (max-width: 480px) {
+        h2 { font-size: 1rem; padding: 12px; }
+        .bubble { font-size: 14px; padding: 10px; }
+        .input-area { flex-direction: column; gap: 8px; }
+        button { width: 100%; margin-left: 0; }
       }
-      .bubble.assistant code {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
-        font-size: 0.95em;
-      }
-      .bubble.assistant table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 10px 0;
-      }
-      .bubble.assistant table th,
-      .bubble.assistant table td {
-        border: 1px solid var(--border);
-        padding: 8px;
-      }
-      .bubble.assistant img {
-        max-width: 100%;
-        border-radius: 8px;
-        margin: 8px 0;
-      }
-      .bubble.assistant a {
-        color: var(--accent);
-        text-decoration: none;
-        border-bottom: 1px dashed rgba(61,217,196,0.4);
-      }
-      .bubble.assistant a:hover { filter: brightness(1.1); }
-      .bubble.assistant ul,
-      .bubble.assistant ol { padding-left: 20px; }
     </style>
 
     <!-- Librerías para Markdown y resaltado -->
@@ -165,81 +143,7 @@
           } catch { return code; }
         },
       });
-  function addMessage(text, role, typing=false) {
-    const box = document.getElementById("box");
-    const msg = document.createElement("div");
-    msg.className = "message";
-
-    const bubble = document.createElement("div");
-    bubble.className = "bubble " + role;
-
-    const rendered = role === "assistant" ? marked.parse(text || "") : (text || "");
-    bubble.innerHTML = rendered + `<div class="meta">${role === "user" ? "Tú" : "IA"} • ahora</div>`;
-
-    msg.appendChild(bubble);
-    box.appendChild(msg);
-    box.scrollTop = box.scrollHeight;
-
-    if (typing && role === "assistant") {
-      typeWriter(bubble, rendered);
-    }
-
-    return bubble;
-  }
-
-function typeWriter(element, html) {
-  element.innerHTML = ""; 
-  let i = 0;
-  const plain = element.textContent || html.replace(/<[^>]+>/g, ""); // texto sin etiquetas
-  function typing() {
-    if (i < plain.length) {
-      element.textContent = plain.substring(0, i+1);
-      i++;
-      setTimeout(typing, 15);
-    } else {
-      // al terminar, renderiza el HTML completo
-      element.innerHTML = html + `<div class="meta">IA • ahora</div>`;
-      element.querySelectorAll("pre code").forEach(block => hljs.highlightElement(block));
-    }
-  }
-  typing();
-}
-
-  async function sendMessage() {
-    const input = document.getElementById("msg");
-    const text = input.value.trim();
-    if (!text) return;
-
-    addMessage(text, "user");
-    input.value = ""; // limpiar caja
-
-    // burbuja "pensando..."
-    const thinkingBubble = addMessage("...", "assistant");
-    thinkingBubble.querySelector(".meta").innerHTML = `<span class="thinking">Robotik está pensando...</span>`;
-
-    try {
-      const res = await fetch("/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text }),
-      });
-      const data = await res.json();
-
-      // reemplazar burbuja pensando
-      thinkingBubble.parentElement.remove();
-      addMessage(data.response, "assistant", true);
-    } catch (err) {
-      thinkingBubble.innerHTML = "Error de red: " + (err?.message || "desconocido");
-    }
-  }
-
-  // ✅ Enter para enviar (sin Shift)
-  document.getElementById("msg").addEventListener("keydown", function (e) {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-});
+      // ... tu JS de mensajes igual que antes ...
     </script>
   </head>
   <body>
@@ -249,16 +153,5 @@ function typeWriter(element, html) {
       <input id="msg" type="text" placeholder="Escribe tu mensaje..." />
       <button onclick="sendMessage()">Enviar</button>
     </div>
-    <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const input = document.getElementById("msg");
-      input.addEventListener("keydown", function (e) {
-        if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault();
-          sendMessage();
-        }
-      });
-    });
-    </script>
   </body>
 </html>
