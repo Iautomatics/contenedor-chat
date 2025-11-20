@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Robotik IA</title>
+    <style>
+      :root { 
+        --bg: #0f1117;
+        --card: rgba(255, 255, 255, 0.05);
+        --border: rgba(255, 255, 255, 0.1);
+        --user-bubble: #1a2231;
+        --assistant-bubble: #121820;
+        --text: #e7eaf0;
+        --text-dim: #a6adbb;
+        --primary: #7c8cff;
+        --accent: #3dd9c4;
+        --radius: 16px;
+        --shadow: 0 8px 30px rgba(0,0,0,0.35);
+      }
+      body {
+        margin: 0;
+        font-family: "Inter", Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      h2 {
+        padding: 20px;
+        margin: 0;
+        font-weight: 600;
+        border-bottom: 1px solid var(--border);
+        background: linear-gradient(90deg, var(--assistant-bubble), transparent);
+      }
+      #box {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background: var(--bg);
+      }
+      .message {
+        max-width: 700px;
+        margin: 0 auto 18px;
+        display: flex;
+        gap: 12px;
+        animation: fadeIn 220ms ease-out;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .bubble {
+        padding: 14px 16px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        line-height: 1.55;
+        position: relative;
+        flex: 1;
+      }
+      .bubble.user {
+        background: var(--user-bubble);
+        border-color: rgba(124,140,255,0.25);
+        align-self: flex-end;
+      }
+      .bubble.assistant {
+        background: var(--assistant-bubble);
+        border-color: rgba(61,217,196,0.18);
+        align-self: flex-start;
+      }
+      .meta {
+        margin-top: 6px;
+        font-size: 12px;
+        color: var(--text-dim);
+      }
+      .thinking {
+        font-style: italic;
+        color: var(--text-dim);
+      }
+      .input-area {
+        display: flex;
+        padding: 16px;
+        border-top: 1px solid var(--border);
+        background: var(--assistant-bubble);
+      }
+      input {
+        flex: 1;
+        padding: 12px 14px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--text);
+        font-size: 15px;
+        outline: none;
+      }
+      button {
+        margin-left: 12px;
+        padding: 12px 18px;
+        border-radius: var(--radius);
+        border: none;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: var(--shadow);
+        transition: 180ms ease;
+      }
+      button:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.05);
+      }
+
+      /* Estilos para contenido Markdown */
+      .bubble.assistant pre {
+        background: #0b0f16;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        overflow: auto;
+      }
+      .bubble.assistant code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+        font-size: 0.95em;
+      }
+      .bubble.assistant table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+      }
+      .bubble.assistant table th,
+      .bubble.assistant table td {
+        border: 1px solid var(--border);
+        padding: 8px;
+      }
+      .bubble.assistant img {
+        max-width: 100%;
+        border-radius: 8px;
+        margin: 8px 0;
+      }
+      .bubble.assistant a {
+        color: var(--accent);
+        text-decoration: none;
+        border-bottom: 1px dashed rgba(61,217,196,0.4);
+      }
+      .bubble.assistant a:hover { filter: brightness(1.1); }
+      .bubble.assistant ul,
+      .bubble.assistant ol { padding-left: 20px; }
+    </style>
+
+    <!-- Librerías para Markdown y resaltado -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+      marked.setOptions({
+        breaks: true,
+        gfm: true,
+        highlight: function (code, lang) {
+          try {
+            if (lang && hljs.getLanguage(lang)) {
+              return hljs.highlight(code, { language: lang }).value;
+            }
+            return hljs.highlightAuto(code).value;
+          } catch { return code; }
+        },
+      });
+  function addMessage(text, role, typing=false) {
+    const box = document.getElementById("box");
+    const msg = document.createElement("div");
+    msg.className = "message";
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble " + role;
+
+    const rendered = role === "assistant" ? marked.parse(text || "") : (text || "");
+    bubble.innerHTML = rendered + `<div class="meta">${role === "user" ? "Tú" : "IA"} • ahora</div>`;
+
+    msg.appendChild(bubble);
+    box.appendChild(msg);
+    box.scrollTop = box.scrollHeight;
+
+    if (typing && role === "assistant") {
+      typeWriter(bubble, rendered);
+    }
+
+    return bubble;
+  }
+
+function typeWriter(element, html) {
+  element.innerHTML = ""; 
+  let i = 0;
+  const plain = element.textContent || html.replace(/<[^>]+>/g, ""); // texto sin etiquetas
+  function typing() {
+    if (i < plain.length) {
+      element.textContent = plain.substring(0, i+1);
+      i++;
+      setTimeout(typing, 15);
+    } else {
+      // al terminar, renderiza el HTML completo
+      element.innerHTML = html + `<div class="meta">IA • ahora</div>`;
+      element.querySelectorAll("pre code").forEach(block => hljs.highlightElement(block));
+    }
+  }
+  typing();
+}
+
+  async function sendMessage() {
+    const input = document.getElementById("msg");
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMessage(text, "user");
+    input.value = ""; // limpiar caja
+
+    // burbuja "pensando..."
+    const thinkingBubble = addMessage("...", "assistant");
+    thinkingBubble.querySelector(".meta").innerHTML = `<span class="thinking">Robotik está pensando...</span>`;
+
+    try {
+      const res = await fetch("/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text }),
+      });
+      const data = await res.json();
+
+      // reemplazar burbuja pensando
+      thinkingBubble.parentElement.remove();
+      addMessage(data.response, "assistant", true);
+    } catch (err) {
+      thinkingBubble.innerHTML = "Error de red: " + (err?.message || "desconocido");
+    }
+  }
+
+  // ✅ Enter para enviar (sin Shift)
+  document.getElementById("msg").addEventListener("keydown", function (e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+    </script>
+  </head>
+  <body>
+    <h2>💬 Habla con Robotik</h2>
+    <div id="box"></div>
+    <div class="input-area">
+      <input id="msg" type="text" placeholder="Escribe tu mensaje..." />
+      <button onclick="sendMessage()">Enviar</button>
+    </div>
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const input = document.getElementById("msg");
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+    });
+    </script>
+  </body>
+</html>
