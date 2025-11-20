@@ -1,0 +1,6 @@
+chat-assistant/
+    app.py
+    templates/
+        index.html
+    requirements.txt
+    Dockerfile

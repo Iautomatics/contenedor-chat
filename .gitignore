@@ -1,0 +1,12 @@
+# Variables de entorno
+.env
+openai.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs
+*.log
