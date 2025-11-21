@@ -239,6 +239,11 @@ function typeWriter(element, html) {
     const input = document.getElementById("msg");
     const text = input.value.trim();
     if (!text) return;
+    // ✅ Ocultar mensaje de bienvenida al enviar el primer mensaje
+    const welcome = document.getElementById("welcome");
+    if (welcome) {
+    welcome.style.display = "none";
+    }
 
     addMessage(text, "user");
     input.value = ""; // limpiar caja
