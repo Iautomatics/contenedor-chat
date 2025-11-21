@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Robotik IA - beta</title>
+
+
+    
     <style>
       :root { 
         --bg: #0f1117;
@@ -177,6 +180,26 @@
       margin-top: 10px;
       color: var(--text-dim);
       }
+
+      #reset-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      transition: transform 0.2s ease;
+}
+
+#reset-btn:hover {
+  transform: scale(1.1);
+}
     </style>
     <!-- Librerías para Markdown y resaltado -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -277,6 +300,9 @@ function typeWriter(element, html) {
 });
   </script>
   </head>
+
+#BODY
+
   <body>
   <h2>Robotik</h2>
   <div id="box"></div>
@@ -290,12 +316,15 @@ function typeWriter(element, html) {
     </div>
   </div>
 
-  <!-- ✅ Área de entrada -->
-  <div class="input-area">
-    <input id="msg" type="text" placeholder="Escribe tu mensaje..." />
-    <button onclick="sendMessage()">Enviar</button>
-    <button onclick="newConversation()">Nueva conversación</button>
-  </div>
+<!-- ✅ Área de entrada -->
+<div class="input-area">
+  <input id="msg" type="text" placeholder="Escribe tu mensaje..." />
+  <button onclick="sendMessage()">Enviar</button>
+</div>
+
+<!-- ✅ Botón flotante -->
+<button id="reset-btn" onclick="newConversation()">♻️</button>
+
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
