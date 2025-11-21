@@ -36,17 +36,23 @@ def ask():
                     "Tu estilo es cercano pero respetuoso, y ayudas al usuario"
                     "con explicaciones concretas pero cuando se necesita ampliar, completas el tema y usas ejemplos cuando es útil."
                 )}
-            ] + session["history"]  # ✅ historial propio del usuario
+            ] + session["history"].append({"role": "user", "content": user_input})
+                session["history"].append({"role": "assistant", "content": ai_text})
+
         )
 
         ai_text = completion.choices[0].message.content
-
         # Agregar respuesta de la IA al historial
         session["history"].append({"role": "assistant", "content": ai_text})
 
         return jsonify({"response": ai_text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+# ✅ Aquí agregas la nueva ruta para reiniciar conversación
+@app.route("/reset", methods=["POST"])
+def reset():
+    session["history"] = []  # limpiar historial de la sesión
+    return jsonify({"message": "Conversación reiniciada"})
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
