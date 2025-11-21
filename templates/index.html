@@ -275,23 +275,29 @@ function typeWriter(element, html) {
     sendMessage();
   }
 });
-    </script>
+  </script>
   </head>
   <body>
-    <h2>Robotik</h2>
-    <div id="box"></div>
-    <div id="welcome" class="message">
-      <div class="bubble assistant">
-        <h1>Hola,</h1>
-        <p>¿En qué puedo ayudarte hoy?</p>
+  <h2>Robotik</h2>
+  <div id="box"></div>
+
+  <!-- ✅ Mensaje de bienvenida -->
+  <div id="welcome" class="message">
+    <div class="bubble assistant">
+      <h1>Hola,</h1>
+      <p>¿En qué puedo ayudarte hoy?</p>
       <div class="meta">IA • ahora</div>
-      </div>
     </div>
-    <div class="input-area">
-      <input id="msg" type="text" placeholder="Escribe tu mensaje..." />
-      <button onclick="sendMessage()">Enviar</button>
-    </div>
-    <script>
+  </div>
+
+  <!-- ✅ Área de entrada -->
+  <div class="input-area">
+    <input id="msg" type="text" placeholder="Escribe tu mensaje..." />
+    <button onclick="sendMessage()">Enviar</button>
+    <button onclick="newConversation()">Nueva conversación</button>
+  </div>
+
+  <script>
     document.addEventListener("DOMContentLoaded", () => {
       const input = document.getElementById("msg");
       input.addEventListener("keydown", function (e) {
@@ -301,6 +307,20 @@ function typeWriter(element, html) {
         }
       });
     });
-    </script>
-  </body>
+
+    // ✅ Función para reiniciar conversación
+    async function newConversation() {
+      try {
+        const res = await fetch("/reset", { method: "POST" });
+        const data = await res.json();
+        // limpiar el chat
+        document.getElementById("box").innerHTML = "";
+        // volver a mostrar bienvenida
+        document.getElementById("welcome").style.display = "block";
+      } catch (err) {
+        console.error("Error al reiniciar:", err);
+      }
+    }
+  </script>
+</body>
 </html>
