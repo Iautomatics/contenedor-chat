@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -195,11 +195,12 @@
       cursor: pointer;
       box-shadow: 0 4px 6px rgba(0,0,0,0.2);
       transition: transform 0.2s ease;
-}
+      z-index: 999; /* ✅ asegura que quede encima */
+      }
 
-#reset-btn:hover {
-  transform: scale(1.1);
-}
+      #reset-btn:hover {
+      transform: scale(1.1);
+      }
     </style>
     <!-- Librerías para Markdown y resaltado -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -317,13 +318,13 @@ function typeWriter(element, html) {
   </div>
 
 <!-- ✅ Área de entrada -->
-<div class="input-area">
-  <input id="msg" type="text" placeholder="Escribe tu mensaje..." />
-  <button onclick="sendMessage()">Enviar</button>
-</div>
+  <div class="input-area">
+    <input id="msg" type="text" placeholder="Escribe tu mensaje..." />
+    <button onclick="sendMessage()">Enviar</button>
+  </div>
 
 <!-- ✅ Botón flotante -->
-<button id="reset-btn" onclick="newConversation()">♻️</button>
+  <button id="reset-btn" onclick="newConversation()">♻️</button>
 
 
   <script>
