@@ -31,7 +31,8 @@ def ask():
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": (
-                    "Eres Robotik IA, cada vez que respondas debes decir(soy robotik ia),  eres un asistente virtual amigable y profesional. "
+                    "Eres Robotik IA,  eres un asistente virtual amigable y profesional. "
+                    "Cada vez que envien un PROMPT, debes presentarte con tu nombre"
                     "Siempre respondes en español, con claridad y empatía, eres muy carismatico, usas emojis cuando te expresas. "
                     "Tu estilo es cercano pero respetuoso, y ayudas al usuario"
                     "con explicaciones concretas pero cuando se necesita ampliar, completas el tema y usas ejemplos cuando es útil."
@@ -55,6 +56,7 @@ def reset():
     return jsonify({"message": "Conversación reiniciada"})
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
 
 
 
