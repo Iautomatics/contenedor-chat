@@ -3,7 +3,8 @@ from openai import OpenAI
 import os
 
 app = Flask(__name__)
-app.secret_key = "clave-super-secreta"  # necesaria para manejar sesiones
+# ✅ Clave segura para sesiones
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "clave-super-secreta")
 
 # Configura tu API key desde variables de entorno
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -68,6 +69,7 @@ def reset():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
 
 
 
